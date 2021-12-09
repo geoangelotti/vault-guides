@@ -34,10 +34,16 @@ jobs:
         run: ./vault-bin secrets enable -path=mock-secrets vault-plugin-secrets-mock
         working-directory: plugins/vault-plugin-secrets-mock
 
+      - name: Vault address variable
+        uses: myci-actions/export-env-var@1
+        with:
+          name: VAULT_ADDR
+          value: http://127.0.0.1:8200
+
       - name: Test write
-        run: VAULT_ADDR=http://127.0.0.1:8200&&./vault-bin write mock-secrets/test message="Hello World"
-        working-directory:
+        run: ./vault-bin write mock-secrets/test message="Hello World"
+        working-directory: plugins/vault-plugin-secrets-mock
 
       - name: Test read
-        run: VAULT_ADDR=http://127.0.0.1:8200&&./vault-bin read mock-secrets/test
-        working-directory:
+        run: ./vault-bin read mock-secrets/test
+        working-directory: plugins/vault-plugin-secrets-mock
