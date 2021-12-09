@@ -22,6 +22,7 @@ jobs:
         run: export DOCKERID=$(docker container ls  | grep 'vault' | awk '{print $1}')
         with:
           name: DOCKERID
+          value: $(docker container ls  | grep 'vault' | awk '{print $1}')
 
       - name: print dockerID
         run: echo $DOCKERID
