@@ -10,37 +10,34 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: move to project
-        run: cd plugins/vault-plugin-secrets-mock
-
-      - name: Run vault container detached
-        run: docker run -d hashicorp/vault:1.2.7
-
-      - name: ls
-        run: ls -l
-
-      - name: Copy binary and kill container
-        run: ./copy-kill.sh
-
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
           go-version: 1.17
 
+      - name: Run vault container detached
+        run: docker run -d hashicorp/vault:1.2.7
+
+      - name: Copy binary and kill container
+        run: ./copy-kill.sh
+        working-directory: plugins/vault-plugin-secrets-mock 
+
       - name: Build binary
         run: make build
+        working-directory: plugins/vault-plugin-secrets-mock 
 
       - name: Start vault dev mode
         run: ./vault-bin server -dev -dev-root-token-id=root -dev-plugin-dir=./vault/plugins &
+        working-directory: plugins/vault-plugin-secrets-mock 
 
       - name: Enable vault plugin
         run: ./vault-bin secrets enable -path=mock-secrets vault-plugin-secrets-mock
+        working-directory: plugins/vault-plugin-secrets-mock 
 
-      - name: export vault address
-        run: export VAULT_ADDR=http://127.0.0.1:8200
-
-      - name: Test write
-        run: ./vault-bin write mock-secrets/test message="Hello World"
+            - name: Test write
+        run: VAULT_ADDR=http://127.0.0.1:8200&&./vault-bin write mock-secrets/test message="Hello World"
+        working-directory:
 
       - name: Test read
-        run: ./vault-bin read mock-secrets/test
+        run: VAULT_ADDR=http://127.0.0.1:8200&&./vault-bin read mock-secrets/test
+        working-directory:
