@@ -21,6 +21,9 @@ jobs:
       - name: Get docker container id
         run: export DOCKERID=$(sudo docker container ls  | sudo grep 'vault' | awk '{print $1}')
 
+      - name: print dockerID
+        run: echo $DOCKERID
+
       - name: Copy vault binary
         run: docker cp $DOCKERID:/bin/vault vault-bin
 
