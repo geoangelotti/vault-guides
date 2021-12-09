@@ -1,0 +1,46 @@
+name: Try current plugin with older vault version
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+
+      - name: Run vault container detached
+        run: docker run -d hashicorp/vault:1.2.7
+
+      - name: Get docker container id
+        run: export DOCKERID=$(sudo docker container ls  | sudo grep 'vault' | awk '{print $1}')
+
+      - name: Copy vault binary
+        run: docker cp $DOCKERID:/bin/vault vault-bin
+
+      - name: Kill container
+        run: docker kill $DOCKERID
+
+      - name: Build binary
+        run: make build
+
+      - name: Start vault dev mode
+        run: ./vault-bin server -dev -dev-root-token-id=root -dev-plugin-dir=./vault/plugins &
+
+      - name: Enable vault plugin
+        run: ./vault-bin secrets enable -path=mock-secrets vault-plugin-secrets-mock
+
+      - name: export vault address
+        run: export VAULT_ADDR=http://127.0.0.1:8200
+
+      - name: Test write
+        run: ./vault-bin write mock-secrets/test message="Hello World"
+
+      - name: Test read
+        run: ./vault-bin read mock-secrets/test
