@@ -41,7 +41,7 @@ jobs:
         run: make build
 
       - name: memlock the binary
-        run: setcap cap_ipc_lock=+ep vault/plugins/vault-plugin-secrets-mock
+        run: sudo setcap cap_ipc_lock=+ep vault/plugins/vault-plugin-secrets-mock
 
       - name: Vault address variable
         uses: myci-actions/export-env-var@1
