@@ -19,7 +19,7 @@ jobs:
         run: docker run -d hashicorp/vault:1.2.7
 
       - name: Get docker container id
-        run: export DOCKERID=$(sudo docker container ls  | sudo grep 'vault' | awk '{print $1}')
+        run: export DOCKERID=$(docker container ls  | grep 'vault' | awk '{print $1}')
 
       - name: print dockerID
         run: echo $DOCKERID
