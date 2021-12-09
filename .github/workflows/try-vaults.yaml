@@ -10,10 +10,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.17
+      - name: move to project
+        run: cd plugins/vault-plugin-secrets-mock
 
       - name: Run vault container detached
         run: docker run -d hashicorp/vault:1.2.7
@@ -23,6 +21,11 @@ jobs:
 
       - name: Copy binary and kill container
         run: ./copy-kill.sh
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
 
       - name: Build binary
         run: make build
