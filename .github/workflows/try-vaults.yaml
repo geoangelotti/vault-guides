@@ -18,20 +18,8 @@ jobs:
       - name: Run vault container detached
         run: docker run -d hashicorp/vault:1.2.7
 
-      - name: Get docker container id
-        run: export DOCKERID=$(docker container ls  | grep 'vault' | awk '{print $1}')
-        with:
-          name: DOCKERID
-          value: $(docker container ls  | grep 'vault' | awk '{print $1}')
-
-      - name: print dockerID
-        run: echo $DOCKERID
-
-      - name: Copy vault binary
-        run: docker cp $DOCKERID:/bin/vault vault-bin
-
-      - name: Kill container
-        run: docker kill $DOCKERID
+      - name: Copy binary and kill container
+        run: ./copy-kill.sh
 
       - name: Build binary
         run: make build
