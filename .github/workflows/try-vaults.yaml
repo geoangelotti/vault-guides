@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: plugins/vault-plugin-secrets-mock
     steps:
       - uses: actions/checkout@v2
 
@@ -20,19 +23,9 @@ jobs:
 
       - name: Copy binary and kill container
         run: ./copy-kill.sh
-        working-directory: plugins/vault-plugin-secrets-mock
 
       - name: Build binary
         run: make build
-        working-directory: plugins/vault-plugin-secrets-mock
-
-      - name: Start vault dev mode
-        run: ./vault-bin server -dev -dev-root-token-id=root -dev-plugin-dir=./vault/plugins &
-        working-directory: plugins/vault-plugin-secrets-mock
-
-      - name: Enable vault plugin
-        run: ./vault-bin secrets enable -path=mock-secrets vault-plugin-secrets-mock
-        working-directory: plugins/vault-plugin-secrets-mock
 
       - name: Vault address variable
         uses: myci-actions/export-env-var@1
@@ -40,10 +33,14 @@ jobs:
           name: VAULT_ADDR
           value: http://127.0.0.1:8200
 
+      - name: Start vault dev mode
+        run: ./vault-bin server -dev -dev-root-token-id=root -dev-plugin-dir=./vault/plugins &
+
+      - name: Enable vault plugin
+        run: ./vault-bin secrets enable -path=mock-secrets vault-plugin-secrets-mock
+
       - name: Test write
         run: ./vault-bin write mock-secrets/test message="Hello World"
-        working-directory: plugins/vault-plugin-secrets-mock
 
       - name: Test read
         run: ./vault-bin read mock-secrets/test
-        working-directory: plugins/vault-plugin-secrets-mock
