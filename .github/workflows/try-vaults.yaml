@@ -18,6 +18,9 @@ jobs:
       - name: Run vault container detached
         run: docker run -d hashicorp/vault:1.2.7
 
+      - name: ls
+        run: ls -l
+
       - name: Copy binary and kill container
         run: ./copy-kill.sh
 
