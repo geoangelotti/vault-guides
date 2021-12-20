@@ -31,17 +31,14 @@ jobs:
         with:
           go-version: 1.17
 
-      - name: Run vault container detached
-        run: docker run -d hashicorp/${{ matrix.vault }}
-
-      - name: Copy binary and kill container
-        run: ./copy-kill.sh
-
       - name: Build binary
         run: make build
 
       - name: memlock the binary
         run: sudo setcap cap_ipc_lock=+ep vault/plugins/vault-plugin-secrets-mock
+
+      - name: Run vault container
+        run: ./run_docker.sh ${{ matrix.vault }}
 
       - name: Vault address variable
         uses: myci-actions/export-env-var@1
@@ -49,14 +46,11 @@ jobs:
           name: VAULT_ADDR
           value: http://127.0.0.1:8200
 
-      - name: Start vault dev mode
-        run: ./vault-bin server -dev -dev-root-token-id=root -dev-plugin-dir=./vault/plugins &
-
       - name: Enable vault plugin
-        run: ./vault-bin secrets enable -path=mock-secrets vault-plugin-secrets-mock
+        run: docker exec notary /bin/sh -c "vault secrets enable -path=mock-secrets vault-plugin-secrets-mock""vault secrets enable -path=mock-secrets vault-plugin-secrets-mock"
 
       - name: Test write
-        run: ./vault-bin write mock-secrets/test message="Hello World"
+        run: docker exec notary /bin/sh -c "vault write mock-secrets/test message='Hello World'"
 
       - name: Test read
-        run: ./vault-bin read mock-secrets/test
+        run: docker exec notary /bin/sh -c "vault read mock-secrets/test"
